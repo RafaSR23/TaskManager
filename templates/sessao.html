@@ -1,0 +1,121 @@
+{% extends 'layout.html' %}
+{% block title %}Sessão de Treino em Andamento{% endblock %}
+{% block content %}
+<header>
+    <h1><i class="fa-solid fa-person-running"></i> Em Andamento: {{ treino.nome }}</h1>
+    <p><a href="{{ url_for('gerenciar_treinos') }}" class="btn btn-danger">Finalizar Treino</a></p>
+</header>
+<hr>
+
+{% for exercicio in exercicios %}
+<div class="card">
+    <h2>{{ exercicio.nome }} <small style="color: #ccc;">(Meta: {{ exercicio.series }} | Carga: {{ exercicio.carga_atual }}kg)</small></h2>
+    <table style="width: 100%; margin-top: 15px;">
+        <thead><tr><th style="width: 20%;">Série</th><th style="width: 40%;">Carga (kg)</th><th style="width: 40%;">Repetições</th></tr></thead>
+        <tbody id="logs-exercicio-{{ exercicio.id }}">
+            {% if exercicio.logs %}{% for log in exercicio.logs %}<tr style="text-align: center;"><td>{{ log.serie }}</td><td>{{ log.carga }} kg</td><td>{{ log.reps }} reps</td></tr>{% endfor %}{% else %}<tr id="placeholder-log-{{ exercicio.id }}"><td colspan="3" style="text-align: center; padding: 10px;">Nenhuma série registrada ainda.</td></tr>{% endif %}
+        </tbody>
+    </table>
+    <hr style="border-color: #444; margin: 20px 0;">
+    <div class="log-form" data-exercicio-id="{{ exercicio.id }}" data-sessao-id="{{ sessao.id }}">
+        <h4 id="titulo-serie-{{ exercicio.id }}">Registrar Série #{{ exercicio.logs|length + 1 }}</h4>
+        <div style="display: flex; gap: 10px; align-items: flex-end;">
+            <div style="flex: 1;"><label>Carga Utilizada (kg)</label><input type="number" name="carga" step="0.5" value="{{ exercicio.carga_atual }}" style="width: 90%;" id="input-carga-{{ exercicio.id }}"></div>
+            <div style="flex: 1;"><label>Repetições Feitas</label><input type="number" name="reps" value="10" style="width: 90%;" id="input-reps-{{ exercicio.id }}"></div>
+            <div><button type="button" class="btn btn-log-set">Salvar Série</button></div>
+            <div><button type="button" class="btn btn-secondary btn-start-timer">Descansar</button></div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<div class="timer-overlay hidden" id="timer-popup">
+    <div class="timer-box">
+        <p>Tempo de Descanso</p>
+        <p class="timer-display" id="timer-display">1:00</p>
+        <button class="btn btn-danger" id="close-timer-btn">Fechar</button>
+    </div>
+</div>
+
+<audio id="timer-alert-sound" src="https://www.soundjay.com/buttons/sounds/button-16.mp3" preload="auto"></audio>
+
+<script>
+    // --- LÓGICA DO CRONÔMETRO ---
+    const timerPopup = document.getElementById('timer-popup');
+    const timerDisplay = document.getElementById('timer-display');
+    const startTimerButtons = document.querySelectorAll('.btn-start-timer');
+    const closeTimerBtn = document.getElementById('close-timer-btn');
+    const alertSound = document.getElementById('timer-alert-sound');
+    let countdown; // Variável para guardar o intervalo do nosso timer
+
+    function startTimer(seconds) {
+        clearInterval(countdown); // Limpa qualquer timer anterior
+        timerPopup.classList.remove('hidden'); // Mostra o pop-up
+        let timeLeft = seconds;
+
+        countdown = setInterval(() => {
+            const minutes = Math.floor(timeLeft / 60);
+            let remainingSeconds = timeLeft % 60;
+            // Adiciona um zero à esquerda se for menor que 10
+            remainingSeconds = remainingSeconds < 10 ? '0' + remainingSeconds : remainingSeconds;
+
+            timerDisplay.textContent = `${minutes}:${remainingSeconds}`;
+
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+                timerDisplay.textContent = "ACABOU!";
+                alertSound.play();
+            }
+            timeLeft--;
+        }, 1000);
+    }
+    
+    // Adiciona o evento de clique para todos os botões "Descansar"
+    startTimerButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            startTimer(60); // Inicia o timer com 60 segundos
+        });
+    });
+
+    // Evento para fechar o pop-up
+    closeTimerBtn.addEventListener('click', () => {
+        clearInterval(countdown);
+        timerPopup.classList.add('hidden');
+    });
+
+    // --- LÓGICA DE LOG DE SÉRIE (AJAX) ---
+    const logButtons = document.querySelectorAll('.btn-log-set');
+    logButtons.forEach(button => {
+        button.addEventListener('click', async (event) => {
+            const formContainer = event.target.closest('.log-form');
+            const exercicioId = formContainer.dataset.exercicioId;
+            const sessaoId = formContainer.dataset.sessaoId;
+            const carga = document.getElementById(`input-carga-${exercicioId}`).value;
+            const reps = document.getElementById(`input-reps-${exercicioId}`).value;
+            try {
+                const response = await fetch("{{ url_for('log_set') }}", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessao_id: sessaoId, exercicio_id: exercicioId, carga: carga, reps: reps }),
+                });
+                if (!response.ok) { throw new Error('A resposta do servidor não foi OK'); }
+                const novoLog = await response.json();
+                const tableBody = document.getElementById(`logs-exercicio-${exercicioId}`);
+                const placeholder = document.getElementById(`placeholder-log-${exercicioId}`);
+                if (placeholder) { placeholder.remove(); }
+                const newRow = document.createElement('tr');
+                newRow.style.textAlign = 'center';
+                newRow.innerHTML = `<td>${novoLog.serie}</td><td>${novoLog.carga} kg</td><td>${novoLog.reps} reps</td>`;
+                tableBody.appendChild(newRow);
+                const tituloSerie = document.getElementById(`titulo-serie-${exercicioId}`);
+                tituloSerie.textContent = `Registrar Série #${novoLog.serie + 1}`;
+                // Dispara o cronômetro automaticamente após salvar a série!
+                startTimer(60);
+            } catch (error) {
+                console.error('Erro ao registrar a série:', error);
+                alert('Ocorreu um erro ao salvar. Tente novamente.');
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,214 @@
+{% extends 'layout.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+    <style>
+        .atrasada { color: #f86c6b; font-weight: bold; }
+        .atrasada small, .atrasada .fa { color: #f86c6b !important; }
+        .nao-concluida-texto { color: #868e96; }
+        .card-danger { border-color: #e55353; background-color: #3d2a2a; }
+        .card-danger h2 { color: #f86c6b; }
+        .nav-link-icon { margin-right: 6px; }
+        .kpi-box.kpi-danger h3, .kpi-box.kpi-danger p { color: #dc3545; }
+        .previsao-icon { color: #63c2de; }
+        .habits-grid { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        .habits-grid th, .habits-grid td { border: 1px solid #444; padding: 8px; text-align: center; }
+        .habits-grid th { font-size: 0.8em; }
+        .habits-grid .habit-name { text-align: left; font-weight: bold; width: 35%; }
+        .habit-checkbox { width: 25px; height: 25px; border: 2px solid #555; border-radius: 5px; cursor: pointer; margin: 0 auto; transition: background-color 0.2s, border-color 0.2s; }
+        .habit-checkbox.completed { background-color: #4dbd74; border-color: #4dbd74; }
+        .habit-checkbox.completed:after { content: '\f00c'; font-family: "Font Awesome 6 Free"; font-weight: 900; color: #fff; font-size: 16px; display: flex; justify-content: center; align-items: center; height: 100%; }
+        .kpi-box h3 small { font-size: 0.5em; }
+        .evolucao-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; }
+        .evolucao-item .nome { font-weight: bold; }
+        .evolucao-item .percentual { padding: 4px 8px; border-radius: 4px; color: #fff; }
+        .evolucao-item .positivo { background-color: #28a745; } /* Verde */
+        .evolucao-item .negativo { background-color: #dc3545; } /* Vermelho */
+        .evolucao-item .neutro { background-color: #6c757d; } /* Cinza */
+    </style>
+    
+    <header><h1>Dashboard Principal</h1></header>
+    <nav>
+        <a href="{{ url_for('nova_tarefa_page') }}"><i class="fa-solid fa-list-check nav-link-icon"></i>Tarefas</a>
+        <a href="{{ url_for('gerenciar_avisos') }}"><i class="fa-solid fa-bullhorn nav-link-icon"></i>Avisos</a>
+        <a href="{{ url_for('gerenciar_treinos') }}"><i class="fa-solid fa-dumbbell nav-link-icon"></i>Treinos</a>
+        <a href="{{ url_for('pagina_habitos') }}"><i class="fa-solid fa-calendar-check nav-link-icon"></i>Hábitos</a>
+    </nav>
+    
+    <div class="dashboard-grid">
+        <div class="card" style="flex-grow: 2;">
+            <section id="avisos-dashboard">
+            {% if avisos %}<h2>Avisos Ativos</h2>{% for aviso in avisos %}<div class="aviso prioridade-{{ aviso['prioridade'] }}">{% if aviso.prioridade == 'Emergencial' %}<i class="fa-solid fa-triangle-exclamation"></i>{% elif aviso.prioridade == 'Alta' %}<i class="fa-solid fa-circle-exclamation"></i>{% elif aviso.prioridade == 'Média' %}<i class="fa-solid fa-circle-info"></i>{% elif aviso.prioridade == 'Baixa' %}<i class="fa-solid fa-circle-check"></i>{% endif %}<div>{{ aviso['descricao'] }}</div></div>{% endfor %}{% endif %}
+            </section>
+            <section id="kpis">
+                <h2>Visão Geral</h2>
+                <div class="kpi-container">
+                    <div class="kpi-box"><h3>{{ kpis.total }}</h3><p>Total de Tarefas</p></div>
+                    <div class="kpi-box"><h3>{{ kpis.pendentes }}</h3><p>Pendentes</p></div>
+                    <div class="kpi-box"><h3>{{ kpis.concluidas }}</h3><p>Concluídas</p></div>
+                    <div class="kpi-box kpi-danger"><h3>{{ kpis.nao_concluidas }}</h3><p>Não Concluídas</p></div>
+                </div>
+                <div class="kpi-container" style="margin-top: 20px;">
+                    <div class="kpi-box"><h3>{{ kpis.perc_tarefas_concluidas|round(1) }}<small>%</small></h3><p>Sucesso (Tarefas)</p></div>
+                    <div class="kpi-box"><h3>{{ kpis.perc_treinos_semana|round(0) }}<small>%</small></h3><p>Meta Semanal (Treino)</p></div>
+                    <div class="kpi-box"><h3>{{ kpis.perc_habitos_semana|round(1) }}<small>%</small></h3><p>Consistência (Hábitos)</p></div>
+                </div>
+            </section>
+            <br></br>
+            <section id="evolucao-treinos">
+                  
+                    <div class="card">
+        <h2><i class="fa-solid fa-arrow-trend-up"></i> Evolução Semanal por Treino</h2>
+        {% if evolucao_treinos %}
+            <ul class="exercise-list" style="margin-top: 0;">
+                {% for treino in evolucao_treinos %}
+                    <li class="evolucao-item">
+                        <span class="nome">{{ treino.nome }}</span>
+                        {% if treino.evolucao > 0 %}
+                            <span class="percentual positivo">+{{ treino.evolucao|round(1) }}% <i class="fa-solid fa-arrow-up"></i></span>
+                        {% elif treino.evolucao < 0 %}
+                            <span class="percentual negativo">{{ treino.evolucao|round(1) }}% <i class="fa-solid fa-arrow-down"></i></span>
+                        {% else %}
+                             <span class="percentual neutro">{{ treino.evolucao|round(1) }}%</span>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>Registre treinos na semana passada e na semana atual para comparar a evolução.</p>
+        {% endif %}
+    </div>
+            </section>
+        </div>
+        <div class="card">
+            <h2>Tarefas Concluídas por Categoria</h2>
+            <canvas id="graficoCategorias"></canvas>
+        </div>
+    </div>
+  
+    <div class="card">
+        <h2><i class="fa-solid fa-calendar-check"></i> Rastreador de Hábitos da Semana</h2>
+        <table class="habits-grid">
+            <thead><tr><th>Hábito</th>{% for dia in dias_da_semana %}<th>{{ ["SEG", "TER", "QUA", "QUI", "SEX", "SÁB", "DOM"][dia.weekday()] }}<br><small>{{ dia.strftime('%d/%m') }}</small></th>{% endfor %}</tr></thead>
+            <tbody>
+                {% for habito in habitos %}
+                <tr>
+                    <td class="habit-name">{{ habito.nome }}</td>
+                    {% for dia in dias_da_semana %}
+                        <td><div class="habit-checkbox {{ 'completed' if habito.status_semana[dia.strftime('%Y-%m-%d')] }}" data-habito-id="{{ habito.id }}" data-data="{{ dia.strftime('%Y-%m-%d') }}"></div></td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="dashboard-grid">
+        <div class="card">
+            <section id="tarefas-hoje">
+            {% if tarefas_hoje %}
+                <h2>Tarefas para <strong>HOJE</strong> ({{ tarefas_hoje|length }})</h2>
+                <ul>
+                {% for tarefa in tarefas_hoje %}
+                    <li class="{{ 'atrasada' if tarefa.is_atrasada }}">
+                        {% if tarefa.status == 'Pendente' %}<form action="{{ url_for('complete_task', id=tarefa.id) }}" method="post" style="display: inline;"><input type="checkbox" onchange="this.form.submit()" title="Concluir tarefa"></form>{% endif %}
+                        <i class="fa-solid {{ tarefa.categoria_icone or 'fa-circle-question' }} categoria-icon" style="color: {{ tarefa.categoria_cor or '#cccccc' }};"></i>
+                        {{ tarefa.titulo }} (<strong>{{ tarefa.categoria_nome }}</strong>)
+                        {% if tarefa.is_atrasada and tarefa.status == 'Pendente' %} (ATRASADA){% endif %}
+                    </li>
+                {% endfor %}
+                </ul>
+            {% else %}
+                <h2>Tarefas para <strong>HOJE</strong></h2><p>Nenhuma tarefa para hoje. Bom descanso!</p>
+            {% endif %}
+            </section>
+        </div>
+        <div class="card">
+            <section id="previsao">
+                <h2>Previsão de Recorrentes</h2>
+                {% if previsao_recorrentes %}
+                    <ul>
+                        {% for tarefa in previsao_recorrentes %}
+                            <li>
+                                <i class="fa-solid fa-calendar-days previsao-icon"></i>
+                                {{ tarefa.titulo }} ({{ tarefa.categoria_nome }})
+                                <small>- Próxima em: {{ tarefa.data_vencimento_futura.strftime('%d/%m/%Y') }}</small>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>Nenhuma tarefa recorrente com previsão futura.</p>
+                {% endif %}
+            </section>
+        </div>
+    </div>
+    
+    <div class="card">
+        <section id="tarefas-categorias">
+            <h2>Tarefas Agendadas (Futuras)</h2>
+            {% if tarefas_por_categoria %}
+                {% for categoria, lista_de_tarefas in tarefas_por_categoria.items() %}
+                    <h3><i class="fa-solid {{ lista_de_tarefas[0].categoria_icone or 'fa-circle-question' }} categoria-icon" style="color: {{ lista_de_tarefas[0].categoria_cor or '#cccccc' }};"></i> {{ categoria }}</h3>
+                    <ul>
+                    {% for tarefa in lista_de_tarefas %}
+                        <li class="{{ 'atrasada' if tarefa.is_atrasada }}">
+                            {% if tarefa.status == 'Pendente' %}<form action="{{ url_for('complete_task', id=tarefa.id) }}" method="post" style="display: inline;"><input type="checkbox" onchange="this.form.submit()" title="Concluir tarefa"></form>{% endif %}
+                            {{ tarefa.titulo }}
+                            <small>- Venc: {% if tarefa.data_vencimento %}{% set data_parts = tarefa.data_vencimento.split('-') %}{{ data_parts[2] }}/{{ data_parts[1] }}/{{ data_parts[0] }}{% else %}N/D{% endif %}</small>
+                            {% if tarefa.is_atrasada and tarefa.status == 'Pendente' %} (ATRASADA){% endif %}
+                        </li>
+                    {% endfor %}
+                    </ul>
+                {% endfor %}
+            {% else %}
+                 <p>Nenhuma outra tarefa pendente encontrada.</p>
+            {% endif %}
+        </section>
+    </div>
+    
+    <div class="dashboard-grid">
+        <div class="card">
+            <section id="ultimas-concluidas">
+            <h2>Últimas Tarefas Concluídas</h2>
+            {% if tarefas_concluidas %}<ul>{% for tarefa in tarefas_concluidas %}<li><s>{{ tarefa.titulo }} ({{ tarefa.categoria_nome }})</s><form action="{{ url_for('reopen_task', id=tarefa.id) }}" method="post" style="display: inline; float: right;"><button type="submit" class="btn btn-secondary"><i class="fa-solid fa-arrow-rotate-left"></i></button></form></li>{% endfor %}</ul>{% else %}<p>Nenhuma tarefa foi concluída recentemente.</p>{% endif %}
+            </section>
+        </div>
+        <div class="card card-danger">
+            <section id="nao-concluidas">
+            <h2><i class="fa-solid fa-circle-xmark"></i> Tarefas Não Concluídas (Recentes)</h2>
+            {% if tarefas_nao_concluidas %}<ul>{% for tarefa in tarefas_nao_concluidas %}<li class="nao-concluida-texto"><s>{{ tarefa.titulo }} ({{ tarefa.categoria_nome }})</s><small>- Venceu em: {% if tarefa.data_vencimento %}{% set data_parts = tarefa.data_vencimento.split('-') %}{{ data_parts[2] }}/{{ data_parts[1] }}/{{ data_parts[0] }}{% endif %}</small></li>{% endfor %}</ul>{% else %}<p>Ótimo trabalho! Nenhuma tarefa vencida encontrada.</p>{% endif %}
+            </section>
+        </div>
+    </div>
+
+    
+    
+    <script>
+        {% if dados_grafico.labels %}
+            const labels = {{ dados_grafico.labels | tojson }};
+            const data = {{ dados_grafico.data | tojson }};
+            const colors = {{ dados_grafico.cores | tojson }};
+            const ctx = document.getElementById('graficoCategorias');
+            new Chart(ctx, { type: 'pie', data: { labels: labels, datasets: [{ label: 'Tarefas Concluídas', data: data, backgroundColor: colors, hoverOffset: 4 }] }, options: { responsive: true, plugins: { legend: { position: 'top', labels: { color: '#e0e0e0' } } } } });
+        {% endif %}
+        document.querySelectorAll('.habit-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('click', async (event) => {
+                const habitoId = event.target.dataset.habitoId;
+                const data = event.target.dataset.data;
+                try {
+                    const response = await fetch("{{ url_for('toggle_habito') }}", {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ habito_id: habitoId, data: data }),
+                    });
+                    if (!response.ok) { throw new Error('Erro de rede'); }
+                    const result = await response.json();
+                    if (result.status === 'adicionado') { event.target.classList.add('completed');
+                    } else if (result.status === 'removido') { event.target.classList.remove('completed'); }
+                } catch (error) {
+                    console.error('Erro ao marcar hábito:', error);
+                    alert('Ocorreu um erro. Tente novamente.');
+                }
+            });
+        });
+    </script>
+{% endblock %}

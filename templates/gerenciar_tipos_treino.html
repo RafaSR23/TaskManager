@@ -1,0 +1,50 @@
+{% extends 'layout.html' %}
+{% block title %}Gerenciar Tipos de Treino{% endblock %}
+{% block content %}
+<header>
+    <h1><i class="fa-solid fa-folder-tree"></i> Gerenciar Tipos de Treino</h1>
+    <p><a href="{{ url_for('gerenciar_treinos') }}" class="btn"><i class="fa-solid fa-arrow-left nav-link-icon"></i>Voltar para Meus Treinos</a></p>
+</header>
+<hr>
+<div class="card">
+    <section>
+        <h2>Adicionar Novo Tipo de Treino</h2>
+        <form action="{{ url_for('add_treino') }}" method="post">
+            <p>
+                <label for="nome">Nome (ex: Treino A):</label><br>
+                <input type="text" name="nome" required>
+            </p>
+            <p>
+                <label for="descricao">Descrição (ex: Peito, Ombro e Tríceps):</label><br>
+                <input type="text" name="descricao">
+            </p>
+            <button type="submit" class="btn">Salvar Tipo de Treino</button>
+        </form>
+    </section>
+</div>
+<div class="card">
+    <main>
+        <h2>Tipos de Treino Existentes</h2>
+        <ul>
+            {% for treino in treinos %}
+            <li class="exercise-item">
+                <div class="exercise-main-info">
+                    <div class="exercise-details">
+                        <strong>{{ treino.nome }}</strong>
+                        <small>{{ treino.descricao }}</small>
+                    </div>
+                    <div class="exercise-actions">
+                        <a href="{{ url_for('editar_tipo_treino', id=treino.id) }}" class="btn btn-secondary btn-sm">Editar</a>
+                        <form action="{{ url_for('delete_tipo_treino', id=treino.id) }}" method="post" style="display: inline;">
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Atenção! Deletar este tipo de treino irá apagar TODOS os exercícios e históricos de sessão associados a ele. Tem certeza?');">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    </main>
+</div>
+{% endblock %}

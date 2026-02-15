@@ -1,0 +1,29 @@
+{% extends 'layout.html' %}
+{% block title %}Detalhes da Sessão{% endblock %}
+{% block content %}
+<header>
+    <h1><i class="fa-solid fa-receipt"></i> Detalhes: {{ treino.nome }}</h1>
+    <p>Realizado em: {{ data_sessao_formatada }}</p>
+    <p><a href="{{ url_for('historico_treinos') }}" class="btn"><i class="fa-solid fa-arrow-left nav-link-icon"></i>Voltar para o Histórico</a></p>
+</header>
+<hr>
+{% for exercicio_nome, dados_exercicio in logs_por_exercicio.items() %}
+<div class="card">
+<div style="display: flex; justify-content: space-between; align-items: center;">
+    <h2>{{ exercicio_nome }}</h2>
+    <a href="{{ url_for('progresso_exercicio', exercicio_id=dados_exercicio.id, next=url_for('detalhe_sessao', sessao_id=sessao.id)) }}" class="btn btn-secondary">
+        <i class="fa-solid fa-chart-line nav-link-icon"></i>Ver Progresso
+    </a>
+</div>
+    <table style="width: 100%; text-align: center;">
+        <thead><tr style="border-bottom: 1px solid #444;"><th style="padding: 8px;">Série</th><th style="padding: 8px;">Carga (kg)</th><th style="padding: 8px;">Repetições</th></tr></thead>
+        <tbody>
+            {% for log in dados_exercicio.logs %}
+            <tr><td>{{ log.serie }}</td><td>{{ log.carga }}</td><td>{{ log.reps }}</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endfor %}
+{% if not logs_por_exercicio %}<div class="card"><p>Nenhum exercício foi registrado para esta sessão.</p></div>{% endif %}
+{% endblock %}

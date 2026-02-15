@@ -1,0 +1,338 @@
+/* static/css/style.css - Ajustes Finais de Design */
+
+/* --- Reset Básico e Estilos Globais --- */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #1a1a1a; 
+    color: #e0e0e0;
+    margin: 0;
+    padding: 20px;
+}
+
+/* --- Container Principal --- */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* --- Menu de Navegação (NOVO ESTILO) --- */
+nav {
+    display: flex;
+    flex-direction: column; /* Por padrão, os itens ficam em coluna (ótimo para celular) */
+    gap: 10px; /* Espaçamento entre os botões */
+    margin-bottom: 25px;
+}
+
+nav a {
+    display: block; /* Faz o link ocupar a linha inteira */
+    background-color: #2b2b2b;
+    color: #ff8c00;
+    padding: 15px; /* Deixa o botão "gordo" e fácil de tocar */
+    text-decoration: none;
+    font-weight: bold;
+    text-align: center;
+    border-radius: 8px;
+    border: 1px solid #444;
+    transition: background-color 0.2s;
+}
+
+nav a:hover {
+    background-color: #444; /* Efeito hover */
+}
+
+/* Regra para telas grandes (computadores) */
+@media (min-width: 768px) {
+    nav {
+        flex-direction: row; /* Em telas largas, volta a ser uma linha */
+        justify-content: center; /* Centraliza os botões */
+    }
+    
+    nav a {
+        display: inline-block; /* Links voltam a se comportar como texto em linha */
+        width: auto; /* Largura automática */
+    }
+}
+
+/* --- Estilo do Cartão (Card) --- */
+.card {
+    background-color: #2b2b2b;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid #444;
+}
+
+/* --- Layout do Dashboard (Flexbox) --- */
+.dashboard-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.dashboard-grid > .card {
+    flex: 1 1 300px;
+}
+
+/* --- Estilos Específicos dos Componentes --- */
+header h1 {
+    color: #ff8c00;
+}
+
+h2, h3 {
+    color: #ffffff;
+    border-bottom: 1px solid #444;
+    padding-bottom: 5px;
+    margin-top: 0;
+}
+
+/* --- Estilos dos Avisos (ATUALIZADO) --- */
+.aviso {
+    padding: 15px;
+    margin-bottom: 10px;
+    border-left-width: 5px;
+    border-radius: 4px;
+    display: flex; /* Usamos flex para alinhar o ícone e o texto */
+    align-items: center;
+}
+.aviso i { /* Estilo para o ícone do aviso */
+    margin-right: 12px;
+    font-size: 1.2em;
+}
+
+/* A prioridade Baixa não tem cor de fundo, apenas a borda */
+.prioridade-Baixa { border: 1px solid #28a745; }
+/* As outras prioridades ganham um fundo sutil e texto branco */
+.prioridade-Média { background-color: #4d452a; border: 1px solid #ffc107; color: #ffffff; }
+.prioridade-Alta { background-color: #442c2e; border: 1px solid #dc3545; color: #ffffff; }
+.prioridade-Emergencial { background-color: #4d2d2a; border: 1px solid #fd7e14; color: #ffffff; }
+
+
+/* --- (O resto do CSS continua o mesmo) --- */
+.kpi-container { display: flex; justify-content: space-around; }
+.kpi-box { text-align: center; }
+.kpi-box h3 { font-size: 2em; margin: 0; border: none; color: #ff8c00; }
+.kpi-box p { margin: 0; color: #aaa; }
+.kpi-box.kpi-danger h3, .kpi-box.kpi-danger p { color: #dc3545; }
+
+ul { list-style: none; padding-left: 0; }
+li { padding: 8px 0; border-bottom: 1px solid #444; display: flex; align-items: center; gap: 10px; }
+li:last-child { border-bottom: none; }
+
+input[type="checkbox"] { filter: invert(1) hue-rotate(90deg); }
+.atrasada { color: #f86c6b; font-weight: bold; }
+.atrasada small, .atrasada .fa-solid { color: #f86c6b !important; }
+.nao-concluida-texto { color: #868e96; }
+.card-danger { border-color: #e55353; background-color: #3d2a2a; }
+.card-danger h2 { color: #f86c6b; }
+.nav-link-icon { margin-right: 6px; }
+
+/* ... (Estilos de botão) ... */
+.btn { display: inline-block; background-color: #ff8c00; color: #ffffff; padding: 10px 18px; text-decoration: none; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-size: 1em; transition: background-color 0.2s ease-in-out; }
+.btn:hover { background-color: #e67e00; }
+.btn-danger { background-color: #dc3545; }
+.btn-danger:hover { background-color: #c82333; }
+.btn-secondary { background-color: #6c757d; font-size: 0.9em; padding: 6px 12px; }
+.btn-secondary:hover { background-color: #5a6268; }
+
+form label {
+    font-weight: bold;
+    color: #ccc;
+}
+
+/* Regra para os principais tipos de input e textarea */
+input[type="text"],
+input[type="date"],
+input[type="number"],
+select,
+textarea {
+    width: 100%; /* A mágica acontece aqui: ocupa 100% da largura disponível */
+    padding: 10px;
+    margin-top: 5px; /* Um respiro acima do campo */
+    border-radius: 5px;
+    border: 1px solid #555;
+    background-color: #333;
+    color: #e0e0e0; /* Cor do texto digitado */
+    font-size: 1em;
+    /* Impede que o padding aumente a largura total do elemento, evitando que ele "vaze" do card */
+    box-sizing: border-box; 
+}
+
+/* Ajusta o tamanho da fonte em selects para consistência */
+select {
+    font-size: 1em;
+}
+
+/* --- Design Responsivo (sem alteração) --- */
+@media (max-width: 768px) {
+    body { padding: 10px; }
+    .dashboard-grid > .card { flex-basis: 100%; }
+    .kpi-container { flex-direction: column; gap: 15px; }
+}
+
+.icon-palette {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 15px;
+    border: 1px solid #444;
+    padding: 15px;
+    border-radius: 5px;
+}
+
+.icon-palette-item {
+    cursor: pointer;
+    font-size: 1.5em; /* Ícones maiores para facilitar o clique */
+    padding: 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.icon-palette-item:hover {
+    background-color: #444; /* Destaque ao passar o mouse */
+}
+
+.timer-overlay {
+    position: fixed; /* Fica fixo na tela, mesmo com rolagem */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); /* Fundo semi-transparente */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Garante que fique na frente de tudo */
+}
+
+.timer-box {
+    background-color: #2b2b2b;
+    padding: 30px 50px;
+    border-radius: 10px;
+    border: 1px solid #ff8c00;
+    text-align: center;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+}
+
+.timer-display {
+    font-size: 5em; /* Números bem grandes */
+    font-weight: bold;
+    color: #ff8c00;
+    margin: 10px 0;
+}
+
+.timer-box button {
+    margin-top: 15px;
+}
+
+/* Classe para esconder/mostrar o pop-up */
+.hidden {
+    display: none !important;
+}
+
+.btn-sm {
+    padding: 5px 10px;
+    font-size: 0.8em;
+}
+
+/* Adicione este código no final de static/css/style.css */
+
+/* --- Estilos para a Nova Lista de Exercícios --- */
+.exercise-list {
+    list-style: none;
+    padding: 0;
+}
+
+.exercise-item {
+    padding: 15px 10px;
+    border-bottom: 1px solid #444;
+}
+.exercise-item:last-child {
+    border-bottom: none;
+}
+
+.exercise-main-info {
+    display: flex;
+    justify-content: space-between; /* Alinha os itens nas extremidades */
+    align-items: center;
+    gap: 15px;
+}
+
+.exercise-details {
+    display: flex;
+    flex-direction: column; /* Coloca o nome em cima dos detalhes */
+    gap: 5px;
+}
+
+.exercise-details strong {
+    font-size: 1.1em;
+    color: #ffffff;
+}
+
+.exercise-details small {
+    color: #aaa;
+}
+
+.exercise-actions {
+    display: flex;
+    gap: 5px; /* Espaço entre os botões de ação */
+}
+
+.exercise-observation {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #1e1e1e; /* Um fundo um pouco diferente */
+    border-radius: 4px;
+    font-size: 0.9em;
+    color: #ccc;
+    border-left: 3px solid #63c2de; /* Um destaque de cor */
+}
+
+.exercise-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+}
+
+.exercise-item {
+    background-color: #333; /* Um fundo um pouco diferente para cada item */
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    border-left: 4px solid #ff8c00; /* Borda laranja para destaque */
+}
+
+.exercise-main-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start; /* Alinha no topo para nomes grandes */
+    gap: 15px;
+    flex-wrap: wrap; /* Permite que os botões quebrem a linha no celular */
+}
+
+.exercise-details strong {
+    font-size: 1.2em; /* Nome do exercício maior */
+    color: #ffffff;
+    display: block; /* Garante que o nome fique na sua própria linha */
+}
+
+.exercise-details small {
+    color: #bbb;
+}
+
+.exercise-actions {
+    display: flex;
+    gap: 8px;
+    /* Faz com que os botões não encolham */
+    flex-shrink: 0; 
+}
+
+.exercise-observation {
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px solid #444;
+    font-size: 0.9em;
+    color: #ccc;
+}
+.exercise-observation i {
+    color: #63c2de; /* Cor do ícone de informação */
+}

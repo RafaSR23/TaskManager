@@ -1,0 +1,88 @@
+{% extends 'layout.html' %}
+{% block title %}Histórico de Treinos{% endblock %}
+{% block content %}
+<header>
+    <h1><i class="fa-solid fa-timeline"></i> Histórico de Treinos</h1>
+    <p><a href="{{ url_for('gerenciar_treinos') }}" class="btn"><i class="fa-solid fa-arrow-left nav-link-icon"></i>Voltar para Meus Treinos</a></p>
+</header>
+<hr>
+
+<div class="card">
+    <h2>Evolução Percentual Semanal (Volume Total)</h2>
+    {% if grafico_evolucao['labels']|length > 1 %}
+        <canvas id="graficoEvolucaoLinha"></canvas>
+    {% else %}
+        <p>Registre treinos em pelo menos duas semanas diferentes para começar a ver sua evolução percentual.</p>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h2>Sessões Realizadas</h2>
+    {% if sessoes %}
+    <ul>
+        {% for sessao in sessoes %}
+        <li>
+            <a href="{{ url_for('detalhe_sessao', sessao_id=sessao.id) }}" style="text-decoration: none; color: #e0e0e0; display: block;">
+                <strong>{{ sessao.treino_nome }}</strong>
+                <small>- Realizado em: 
+                    {% set data_obj = sessao.data_sessao.split(' ')[0] %}
+                    {% set data_parts = data_obj.split('-') %}
+                    {{ data_parts[2] }}/{{ data_parts[1] }}/{{ data_parts[0] }}
+                </small>
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>Nenhuma sessão de treino foi registrada ainda. Inicie um treino para começar!</p>
+    {% endif %}
+</div>
+
+<script>
+    {% if grafico_evolucao['labels']|length > 1 %}
+        const ctxEvolucao = document.getElementById('graficoEvolucaoLinha');
+        new Chart(ctxEvolucao, {
+            type: 'line', // Tipo: linha
+            data: {
+                labels: {{ grafico_evolucao.labels | tojson }},
+                datasets: {{ grafico_evolucao.datasets | tojson }}
+            },
+            options: {
+                plugins: {
+                    title: { display: true, text: 'Variação de Volume (%) vs Semana Anterior', color: '#e0e0e0' },
+                    legend: { labels: { color: '#e0e0e0' } },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    // Adiciona o sinal de '+' para valores positivos
+                                    let value = context.parsed.y > 0 ? '+' : '';
+                                    label += value + context.parsed.y.toFixed(1) + '%';
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                responsive: true,
+                scales: {
+                    x: { ticks: { color: '#e0e0e0' } },
+                    y: { 
+                        ticks: { 
+                            color: '#e0e0e0',
+                            // Adiciona o '%' ao lado dos números do eixo Y
+                            callback: function(value, index, values) {
+                                return value + '%';
+                            }
+                        } 
+                    }
+                }
+            }
+        });
+    {% endif %}
+</script>
+{% endblock %}

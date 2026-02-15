@@ -1,0 +1,37 @@
+{% extends 'layout.html' %}
+{% block title %}Editar Exercício{% endblock %}
+{% block content %}
+    <header>
+        <h1><i class="fa-solid fa-pencil"></i> Editar Exercício</h1>
+        <p><a href="{{ url_for('gerenciar_treinos') }}" class="btn"><i class="fa-solid fa-arrow-left nav-link-icon"></i>Cancelar e Voltar</a></p>
+    </header>
+    <hr>
+    <div class="card">
+        <section id="edita-exercicio">
+            <form action="{{ url_for('update_exercicio', id=exercicio.id) }}" method="post">
+                <h4>Editando '{{ exercicio.nome }}'</h4>
+                <div style="display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;">
+                    <div style="flex: 2 1 200px;">
+                        <label for="nome">Nome do Exercício:</label><br>
+                        <input type="text" name="nome" value="{{ exercicio.nome }}" required style="width: 95%;">
+                    </div>
+                    <div style="flex: 1 1 100px;">
+                        <label for="series">Séries:</label><br>
+                        <input type="text" name="series" value="{{ exercicio.series }}" placeholder="ex: 4x10" style="width: 90%;">
+                    </div>
+                    <div style="flex: 1 1 100px;">
+                        <label for="carga_atual">Carga (kg):</label><br>
+                        <input type="number" name="carga_atual" step="0.5" value="{{ exercicio.carga_atual }}" style="width: 90%;">
+                    </div>
+                     <div style="flex: 2 1 200px;">
+                        <label for="observacao">Observação:</label><br>
+                        <input type="text" name="observacao" value="{{ exercicio.observacao or '' }}" style="width: 95%;">
+                    </div>
+                    <div>
+                        <button type="submit" class="btn">Salvar Alterações</button>
+                    </div>
+                </div>
+            </form>
+        </section>
+    </div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends 'layout.html' %}
+{% block title %}Progresso do Exercício{% endblock %}
+{% block content %}
+<header>
+    <h1><i class="fa-solid fa-chart-simple"></i> Progresso para: {{ exercicio.nome }}</h1>
+    <p><a href="{{ next_url }}" class="btn"><i class="fa-solid fa-arrow-left nav-link-icon"></i>Voltar</a></p>
+</header>
+<hr>
+
+<div class="card">
+    {% if dados_grafico.labels|length > 1 %}
+        <canvas id="graficoProgresso"></canvas>
+    {% else %}
+        <p>Você precisa de pelo menos duas sessões com este exercício para gerar um gráfico de progressão. Continue treinando!</p>
+    {% endif %}
+</div>
+
+<script>
+    {% if dados_grafico.labels|length > 1 %}
+        const labels = {{ dados_grafico.labels | tojson }};
+        const data = {{ dados_grafico.data | tojson }};
+        const ctx = document.getElementById('graficoProgresso');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Carga Máxima (kg)',
+                    data: data,
+                    fill: false,
+                    borderColor: '#ff8c00',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: { beginAtZero: true, ticks: { color: '#e0e0e0' } },
+                    x: { ticks: { color: '#e0e0e0' } }
+                },
+                plugins: {
+                    legend: { labels: { color: '#e0e0e0' } }
+                }
+            }
+        });
+    {% endif %}
+</script>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends 'layout.html' %}
+{% block title %}Editar Categoria{% endblock %}
+{% block content %}
+    <header>
+        <h1>Editar Categoria</h1>
+        <p><a href="{{ url_for('gerenciar_categorias') }}" class="btn"><i class="fa-solid fa-arrow-left nav-link-icon"></i>Cancelar e Voltar</a></p>
+    </header>
+    <hr>
+    <div class="card">
+        <section id="edita-categoria">
+            <form action="{{ url_for('update_categoria', id=categoria.id) }}" method="post">
+                <p>
+                    <label for="nome">Nome:</label><br>
+                    <input type="text" name="nome" value="{{ categoria.nome }}" required>
+                </p>
+                <p>
+                    <label for="icone">Ícone (ex: fa-star):</label><br>
+                    <input type="text" name="icone" id="icon-input" value="{{ categoria.icone }}">
+                </p>
+                <p>
+                    <label for="cor">Cor:</label><br>
+                    <input type="color" name="cor" value="{{ categoria.cor }}">
+                </p>
+                <button type="submit" class="btn">Salvar Alterações</button>
+            </form>
+            
+            <div>
+                <p><strong>Ou escolha um ícone da paleta:</strong></p>
+                <div class="icon-palette">
+                    {% for icone_sug in icones_sugeridos %}
+                        <span class="icon-palette-item" data-icon-name="{{ icone_sug }}" title="{{ icone_sug }}">
+                            <i class="fa-solid {{ icone_sug }}"></i>
+                        </span>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const iconItems = document.querySelectorAll('.icon-palette-item');
+        const iconInput = document.getElementById('icon-input');
+        iconItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const iconName = item.dataset.iconName;
+                iconInput.value = iconName;
+            });
+        });
+    </script>
+{% endblock %}

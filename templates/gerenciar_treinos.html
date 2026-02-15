@@ -1,0 +1,61 @@
+{% extends 'layout.html' %}
+{% block title %}Meus Treinos{% endblock %}
+{% block content %}
+<header>
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h1><i class="fa-solid fa-dumbbell"></i> Meus Treinos</h1>
+        <a href="{{ url_for('index') }}" class="btn"><i class="fa-solid fa-arrow-left nav-link-icon"></i>Voltar ao Dashboard</a>
+    </div>
+    <div style="margin-top: 10px;">
+        <a href="{{ url_for('gerenciar_tipos_treino') }}" class="btn btn-secondary btn-sm">Gerenciar Tipos de Treino</a>
+        <a href="{{ url_for('historico_treinos') }}" class="btn btn-secondary btn-sm">Ver Histórico de Sessões</a>
+    </div>
+</header>
+<hr>
+{% for treino in treinos %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h2>{{ treino.nome }}: <small style="color: #ccc;">{{ treino.descricao }}</small></h2>
+        <form action="{{ url_for('iniciar_treino', treino_id=treino.id) }}" method="post">
+            <button type="submit" class="btn">INICIAR TREINO</button>
+        </form>
+    </div>
+    <ul class="exercise-list">
+        {% if treino.exercicios %}
+            {% for exercicio in treino.exercicios %}
+            <li class="exercise-item">
+                <div class="exercise-main-info">
+                    <div class="exercise-details" style="display: flex; align-items: center; gap: 10px;">
+                        <a href="{{ url_for('progresso_exercicio', exercicio_id=exercicio.id, next=url_for('gerenciar_treinos')) }}" class="btn btn-secondary btn-sm" title="Ver Progresso"><i class="fa-solid fa-chart-line"></i></a>
+                        <div>
+                           <strong>{{ exercicio.nome }}</strong>
+                           <small>Meta: {{ exercicio.series }} | Carga Alvo: {{ exercicio.carga_atual }}kg</small>
+                        </div>
+                    </div>
+                    <div class="exercise-actions">
+                        <a href="{{ url_for('editar_exercicio', id=exercicio.id) }}" class="btn btn-secondary btn-sm" title="Editar Exercício"><i class="fa-solid fa-pencil"></i></a>
+                        <form action="{{ url_for('delete_exercicio', id=exercicio.id) }}" method="post" style="display: inline;"><button type="submit" class="btn btn-danger btn-sm" title="Deletar Exercício"><i class="fa-solid fa-trash"></i></button></form>
+                    </div>
+                </div>
+                {% if exercicio.observacao %}<div class="exercise-observation"><i class="fa-solid fa-circle-info"></i> {{ exercicio.observacao }}</div>{% endif %}
+            </li>
+            {% endfor %}
+        {% else %}
+            <li style="text-align: center; padding: 10px; background: none; border: none;">Nenhum exercício cadastrado para este treino.</li>
+        {% endif %}
+    </ul>
+    <hr style="border-color: #444; margin: 20px 0;">
+    <form action="{{ url_for('add_exercicio') }}" method="post" style="margin-top: 20px;">
+        <h4>Adicionar Novo Exercício ao {{ treino.nome }}</h4>
+        <input type="hidden" name="treino_id" value="{{ treino.id }}">
+        <div style="display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap;">
+            <div style="flex: 2 1 200px;"><label for="nome">Nome do Exercício:</label><br><input type="text" name="nome" required></div>
+            <div style="flex: 1 1 100px;"><label for="series">Séries:</label><br><input type="text" name="series" placeholder="ex: 4x10"></div>
+            <div style="flex: 1 1 100px;"><label for="carga_atual">Carga (kg):</label><br><input type="number" name="carga_atual" step="0.5" value="0"></div>
+            <div style="flex: 2 1 200px;"><label for="observacao">Observação:</label><br><input type="text" name="observacao"></div>
+            <div><button type="submit" class="btn">Adicionar</button></div>
+        </div>
+    </form>
+</div>
+{% endfor %}
+{% endblock %}

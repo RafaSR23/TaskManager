@@ -1,0 +1,101 @@
+{% extends 'layout.html' %}
+{% block title %}Rastreador de Hábitos{% endblock %}
+{% block content %}
+<style>
+    .habits-grid { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    .habits-grid th, .habits-grid td { border: 1px solid #444; padding: 12px; text-align: center; }
+    .habits-grid th { font-size: 0.8em; }
+    .habits-grid .habit-name { text-align: left; font-weight: bold; }
+    .habit-checkbox {
+        width: 30px; height: 30px; border: 2px solid #555;
+        border-radius: 5px; cursor: pointer; margin: 0 auto;
+        transition: background-color 0.2s, border-color 0.2s;
+    }
+    .habit-checkbox.completed { background-color: #4dbd74; border-color: #4dbd74; }
+    .habit-checkbox.completed:after {
+        content: '\f00c'; font-family: "Font Awesome 6 Free"; font-weight: 900;
+        color: #fff; font-size: 18px; display: flex;
+        justify-content: center; align-items: center; height: 100%;
+    }
+    /* Estilos para a navegação da semana */
+    .week-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+</style>
+
+<header>
+    <h1><i class="fa-solid fa-calendar-check"></i> Rastreador de Hábitos</h1>
+    <p><a href="{{ url_for('index') }}" class="btn"><i class="fa-solid fa-arrow-left nav-link-icon"></i>Voltar ao Dashboard</a></p>
+</header>
+<hr>
+<div class="card">
+    <div class="week-nav">
+        <a href="{{ url_for('pagina_habitos', data=semana_anterior) }}" class="btn btn-secondary">&larr; Semana Anterior</a>
+        <h2>Semana: {{ semana_atual_formatada }}</h2>
+        <a href="{{ url_for('pagina_habitos', data=semana_seguinte) }}" class="btn btn-secondary">Próxima Semana &rarr;</a>
+    </div>
+
+    <table class="habits-grid">
+        <thead>
+            <tr>
+                <th>Hábito</th>
+                {% for dia in dias_da_semana %}
+                    <th>
+                        {{ ["SEG", "TER", "QUA", "QUI", "SEX", "SÁB", "DOM"][dia.weekday()] }}<br><small>{{ dia.strftime('%d/%m') }}</small>
+                    </th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for habito in habitos %}
+            <tr>
+                <td class="habit-name">{{ habito.nome }}</td>
+                {% for dia in dias_da_semana %}
+                    <td>
+                        <div class="habit-checkbox {{ 'completed' if habito.status_semana[dia.strftime('%Y-%m-%d')] }}"
+                             data-habito-id="{{ habito.id }}" data-data="{{ dia.strftime('%Y-%m-%d') }}">
+                        </div>
+                    </td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<div class="card">
+    <h3>Adicionar Novo Hábito</h3>
+    <form action="{{ url_for('add_habito') }}" method="post">
+        <input type="text" name="nome" placeholder="Nome do novo hábito" required>
+        <button type="submit" class="btn" style="margin-top: 10px;">Adicionar Hábito</button>
+    </form>
+</div>
+
+<script>
+    document.querySelectorAll('.habit-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('click', async (event) => {
+            const habitoId = event.target.dataset.habitoId;
+            const data = event.target.dataset.data;
+            try {
+                const response = await fetch("{{ url_for('toggle_habito') }}", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ habito_id: habitoId, data: data }),
+                });
+                if (!response.ok) { throw new Error('Erro de rede'); }
+                const result = await response.json();
+                if (result.status === 'adicionado') {
+                    event.target.classList.add('completed');
+                } else if (result.status === 'removido') {
+                    event.target.classList.remove('completed');
+                }
+            } catch (error) {
+                console.error('Erro ao marcar hábito:', error);
+                alert('Ocorreu um erro. Tente novamente.');
+            }
+        });
+    });
+</script>
+{% endblock %}

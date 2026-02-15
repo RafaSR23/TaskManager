@@ -1,0 +1,59 @@
+{% extends 'layout.html' %}
+{% block title %}Gerenciar Categorias{% endblock %}
+{% block content %}
+    <header>
+        <h1>Gerenciar Categorias</h1>
+        <p><a href="{{ url_for('index') }}" class="btn"><i class="fa-solid fa-arrow-left nav-link-icon"></i>Voltar ao Dashboard</a></p>
+    </header>
+    <hr>
+    <div class="card">
+        <section id="nova-categoria">
+            <h2>Adicionar Nova Categoria</h2>
+            <form action="{{ url_for('add_categoria') }}" method="post">
+                <p><label for="nome">Nome:</label> <input type="text" name="nome" required></p>
+                <p><label for="icone">Ícone (ex: fa-star):</label> <input type="text" name="icone" id="icon-input"></p>
+                <p><label for="cor">Cor:</label> <input type="color" name="cor" value="#cccccc"></p>
+                <button type="submit" class="btn">Salvar Categoria</button>
+            </form>
+            <div>
+                <p><strong>Ou escolha um ícone da paleta:</strong></p>
+                <div class="icon-palette">
+                    {% for icone_sug in icones_sugeridos %}
+                        <span class="icon-palette-item" data-icon-name="{{ icone_sug }}" title="{{ icone_sug }}"><i class="fa-solid {{ icone_sug }}"></i></span>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+    </div>
+    <div class="card">
+        <main id="lista-categorias">
+            <h2>Categorias Existentes</h2>
+            <ul>
+                {% for categoria in categorias %}
+                <li style="justify-content: space-between;"> <div>
+                        <span style="display: inline-block; width: 12px; height: 12px; background-color: {{ categoria.cor | default('#cccccc') }}; border-radius: 3px;"></span>
+                        <i class="fa-solid {{ categoria.icone or 'fa-circle-question' }}"></i>
+                        <strong>{{ categoria.nome }}</strong>
+                    </div>
+                    <div>
+                        <a href="{{ url_for('editar_categoria', id=categoria.id) }}" class="btn btn-secondary" style="margin-right: 5px;">Editar</a>
+                        <form action="{{ url_for('delete_categoria', id=categoria.id) }}" method="post" style="display: inline;">
+                            <button type="submit" class="btn btn-danger">Deletar</button>
+                        </form>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </main>
+    </div>
+    <script>
+        const iconItems = document.querySelectorAll('.icon-palette-item');
+        const iconInput = document.getElementById('icon-input');
+        iconItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const iconName = item.dataset.iconName;
+                iconInput.value = iconName;
+            });
+        });
+    </script>
+{% endblock %}
